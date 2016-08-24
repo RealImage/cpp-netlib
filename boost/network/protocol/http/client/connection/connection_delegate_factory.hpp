@@ -33,6 +33,7 @@ struct connection_delegate_factory {
   // TODO Support passing in proxy settings when crafting connections.
   static connection_delegate_ptr new_connection_delegate(
       asio::io_service& service, bool https, bool always_verify_peer,
+      optional<string_type> certificates_buffer,
       optional<string_type> certificate_filename,
       optional<string_type> verify_path, optional<string_type> certificate_file,
       optional<string_type> private_key_file, optional<string_type> ciphers,
@@ -41,8 +42,9 @@ struct connection_delegate_factory {
     if (https) {
 #ifdef BOOST_NETWORK_ENABLE_HTTPS
       delegate.reset(new ssl_delegate(
-          service, always_verify_peer, certificate_filename, verify_path,
-          certificate_file, private_key_file, ciphers, ssl_options));
+          service, always_verify_peer, certificates_buffer, certificate_filename,
+          verify_path, certificate_file, private_key_file, ciphers,
+          ssl_options));
 #else
       BOOST_THROW_EXCEPTION(std::runtime_error("HTTPS not supported."));
 #endif /* BOOST_NETWORK_ENABLE_HTTPS */

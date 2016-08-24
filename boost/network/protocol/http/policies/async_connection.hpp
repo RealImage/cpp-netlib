@@ -38,7 +38,8 @@ struct async_connection_policy : resolver_policy<Tag>::type {
   struct connection_impl {
     connection_impl(bool follow_redirect, bool always_verify_peer,
                     resolve_function resolve, resolver_type& resolver,
-                    bool https, int timeout,
+                    bool https, optional<string_type> const& certificates_buffer,
+                    int timeout,
                     optional<string_type> const& certificate_filename,
                     optional<string_type> const& verify_path,
                     optional<string_type> const& certificate_file,
@@ -48,9 +49,9 @@ struct async_connection_policy : resolver_policy<Tag>::type {
           Tag, version_major,
           version_minor>::new_connection(resolve, resolver, follow_redirect,
                                          always_verify_peer, https, timeout,
-                                         certificate_filename, verify_path,
-                                         certificate_file, private_key_file,
-                                         ciphers, ssl_options);
+                                         certificates_buffer, certificate_filename,
+                                         verify_path, certificate_file,
+                                         private_key_file, ciphers, ssl_options);
     }
 
     basic_response<Tag> send_request(string_type const& method,
@@ -70,6 +71,8 @@ struct async_connection_policy : resolver_policy<Tag>::type {
   connection_ptr get_connection(
       resolver_type& resolver, basic_request<Tag> const& request_,
       bool always_verify_peer,
+      optional<string_type> const& certificates_buffer =
+          optional<string_type>(),
       optional<string_type> const& certificate_filename =
           optional<string_type>(),
       optional<string_type> const& verify_path = optional<string_type>(),
@@ -85,8 +88,8 @@ struct async_connection_policy : resolver_policy<Tag>::type {
                     this, boost::arg<1>(), boost::arg<2>(), boost::arg<3>(),
                     boost::arg<4>()),
         resolver, boost::iequals(protocol_, string_type("https")), timeout_,
-        certificate_filename, verify_path, certificate_file, private_key_file,
-        ciphers, ssl_options));
+        certificates_buffer, certificate_filename, verify_path, certificate_file,
+        private_key_file, ciphers, ssl_options));
     return connection_;
   }
 

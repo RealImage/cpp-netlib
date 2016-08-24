@@ -39,7 +39,9 @@ struct async_connection_base {
   // tag.
   static connection_ptr new_connection(
       resolve_function resolve, resolver_type &resolver, bool follow_redirect,
-      bool always_verify_peer, bool https, int timeout,
+      bool always_verify_peer, bool https,
+      optional<string_type> certificates_buffer = optional<string_type>(),
+      int timeout = 0,
       optional<string_type> certificate_filename = optional<string_type>(),
       optional<string_type> const &verify_path = optional<string_type>(),
       optional<string_type> certificate_file = optional<string_type>(),
@@ -54,8 +56,8 @@ struct async_connection_base {
         resolver, resolve, follow_redirect, timeout,
         delegate_factory_type::new_connection_delegate(
             resolver.get_io_service(), https, always_verify_peer,
-            certificate_filename, verify_path, certificate_file,
-            private_key_file, ciphers, ssl_options)));
+            certificates_buffer, certificate_filename, verify_path,
+            certificate_file, private_key_file, ciphers, ssl_options)));
     BOOST_ASSERT(temp.get() != 0);
     return temp;
   }

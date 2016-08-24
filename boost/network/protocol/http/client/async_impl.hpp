@@ -39,6 +39,7 @@ struct async_client
   async_client(bool cache_resolved, bool follow_redirect,
                bool always_verify_peer, int timeout,
                boost::shared_ptr<boost::asio::io_service> service,
+               optional<string_type> certificates_buffer,
                optional<string_type> const& certificate_filename,
                optional<string_type> const& verify_path,
                optional<string_type> const& certificate_file,
@@ -51,6 +52,7 @@ struct async_client
         service_(*service_ptr),
         resolver_(service_),
         sentinel_(new boost::asio::io_service::work(service_)),
+        certificates_buffer_(std::move(certificates_buffer)),
         certificate_filename_(certificate_filename),
         verify_path_(verify_path),
         certificate_file_(certificate_file),
@@ -81,9 +83,9 @@ struct async_client
       body_generator_function_type generator) {
     typename connection_base::connection_ptr connection_;
     connection_ = connection_base::get_connection(
-        resolver_, request_, always_verify_peer_, certificate_filename_,
-        verify_path_, certificate_file_, private_key_file_, ciphers_,
-        ssl_options_);
+        resolver_, request_, always_verify_peer_, certificates_buffer_,
+        certificate_filename_, verify_path_, certificate_file_, private_key_file_,
+        ciphers_, ssl_options_);
     return connection_->send_request(method, request_, get_body, callback,
                                      generator);
   }
@@ -93,6 +95,7 @@ struct async_client
   resolver_type resolver_;
   boost::shared_ptr<boost::asio::io_service::work> sentinel_;
   boost::shared_ptr<boost::thread> lifetime_thread_;
+  optional<string_type> certificates_buffer_;
   optional<string_type> certificate_filename_;
   optional<string_type> verify_path_;
   optional<string_type> certificate_file_;

@@ -10,9 +10,11 @@
 #include <boost/network/protocol/http/client/connection/ssl_delegate.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/bind.hpp>
+#include <boost/algorithm/string.hpp>
 
 boost::network::http::impl::ssl_delegate::ssl_delegate(
     asio::io_service &service, bool always_verify_peer,
+    optional<std::string> certificates_buffer,
     optional<std::string> certificate_filename,
     optional<std::string> verify_path,
     optional<std::string> certificate_file,
@@ -20,6 +22,7 @@ boost::network::http::impl::ssl_delegate::ssl_delegate(
     optional<std::string> ciphers,
     long ssl_options)
     : service_(service),
+      certificates_buffer_(std::move(certificates_buffer)),
       certificate_filename_(certificate_filename),
       verify_path_(verify_path),
       certificate_file_(certificate_file),
@@ -52,6 +55,42 @@ void boost::network::http::impl::ssl_delegate::connect(
       context_->set_default_verify_paths();
 	 } else
       context_->set_verify_mode(asio::ssl::context::verify_none);
+  }
+  if (certificates_buffer_) {
+    context_->set_verify_mode(asio::ssl::context::verify_peer);
+
+    std::string line;
+    bool isPemData = false;;
+    std::vector<std::string> certificatesPem;
+    std::istringstream inputStream (certificates_buffer_->c_str());
+
+    while (inputStream.good() && !inputStream.eof())
+    {
+        std::getline(inputStream, line);
+        // removes \r from Windows new lines
+        boost::algorithm::trim_if(line, boost::algorithm::is_any_of("\r"));
+
+        if (boost::starts_with(line, "-----BEGIN CERTIFICATE-----"))
+        {
+            isPemData = true;
+            certificatesPem.push_back(std::string());
+        }
+
+        if (isPemData)
+        {
+            certificatesPem.back().append(line);
+            certificatesPem.back().append("\n");
+        }
+
+        if (boost::starts_with(line, "-----END CERTIFICATE-----"))
+        {
+            isPemData = false;
+        }
+    }
+    for (auto cert_authority : certificatesPem) {
+      context_->add_certificate_authority(boost::asio::const_buffer(
+        cert_authority.c_str(), cert_authority.size()));
+    }
   }
   if (certificate_file_)
     context_->use_certificate_file(*certificate_file_,

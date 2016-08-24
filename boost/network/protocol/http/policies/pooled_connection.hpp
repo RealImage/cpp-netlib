@@ -43,7 +43,8 @@ struct pooled_connection_policy : resolver_policy<Tag>::type {
     typedef function<shared_ptr<connection_impl>(
         resolver_type&, basic_request<Tag> const&, optional<string_type> const&,
         optional<string_type> const&, optional<string_type> const&,
-        optional<string_type> const&, optional<string_type> const&)>
+        optional<string_type> const&, optional<string_type> const&,
+        optional<string_type> const&)>
         get_connection_function;
 
     connection_impl(
@@ -154,8 +155,8 @@ struct pooled_connection_policy : resolver_policy<Tag>::type {
               request_.uri(location_header->second);
               connection_ptr connection_;
               connection_ = get_connection_(
-                  resolver_, request_, certificate_filename_, verify_path_,
-                  certificate_file_, private_key_file_, ciphers_);
+                  resolver_, request_, certificates_buffer_, certificate_filename_,
+                  verify_path_, certificate_file_, private_key_file_, ciphers_);
               ++count;
               continue;
             } else
@@ -172,6 +173,7 @@ struct pooled_connection_policy : resolver_policy<Tag>::type {
     resolver_type& resolver_;
     bool connection_follow_redirect_;
     get_connection_function get_connection_;
+    optional<string_type> certificates_buffer_;
     optional<string_type> certificate_filename_;
     optional<string_type> verify_path_;
     optional<string_type> certificate_file_;
@@ -190,6 +192,8 @@ struct pooled_connection_policy : resolver_policy<Tag>::type {
   connection_ptr get_connection(
       resolver_type& resolver, basic_request<Tag> const& request_,
       bool always_verify_peer,
+      optional<string_type> const& certificates_buffer =
+          optional<string_type>(),
       optional<string_type> const& certificate_filename =
           optional<string_type>(),
       optional<string_type> const& verify_path = optional<string_type>(),
@@ -211,7 +215,8 @@ struct pooled_connection_policy : resolver_policy<Tag>::type {
                                                 version_minor>::get_connection,
                       this, boost::arg<1>(), boost::arg<2>(),
                       always_verify_peer, boost::arg<3>(), boost::arg<4>(),
-                      boost::arg<5>(), boost::arg<6>(), boost::arg<7>()),
+                      boost::arg<5>(), boost::arg<6>(), boost::arg<7>(),
+                      boost::arg<8>()),
           boost::iequals(request_.protocol(), string_type("https")),
           always_verify_peer, timeout_, certificate_filename, verify_path,
           certificate_file, private_key_file, ciphers, 0));

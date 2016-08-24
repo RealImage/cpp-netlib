@@ -44,6 +44,8 @@ struct simple_connection_policy : resolver_policy<Tag>::type {
         resolver_type& resolver, bool follow_redirect, bool always_verify_peer,
         string_type const& hostname, string_type const& port,
         resolver_function_type resolve, bool https, int timeout,
+        optional<string_type> const& certificates_buffer =
+            optional<string_type>(),
         optional<string_type> const& certificate_filename =
             optional<string_type>(),
         optional<string_type> const& verify_path = optional<string_type>(),

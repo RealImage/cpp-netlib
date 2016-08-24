@@ -160,10 +160,11 @@ struct basic_client_facade {
   void init_pimpl(client_options<Tag> const& options) {
     pimpl.reset(new pimpl_type(
         options.cache_resolved(), options.follow_redirects(),
-        options.always_verify_peer(), options.openssl_certificate(),
-        options.openssl_verify_path(), options.openssl_certificate_file(),
-        options.openssl_private_key_file(), options.openssl_ciphers(),
-        options.openssl_options(), options.io_service(), options.timeout()));
+        options.always_verify_peer(), options.openssl_certificates_buffer(),
+        options.openssl_certificate(), options.openssl_verify_path(),
+        options.openssl_certificate_file(), options.openssl_private_key_file(),
+        options.openssl_ciphers(), options.openssl_options(),
+        options.io_service(), options.timeout()));
   }
 };
 

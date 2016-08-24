@@ -23,6 +23,7 @@ struct client_options {
   client_options()
       : cache_resolved_(false),
         follow_redirects_(false),
+        openssl_certificates_buffer_(),
         openssl_certificate_(),
         openssl_verify_path_(),
         openssl_certificate_file_(),
@@ -36,6 +37,7 @@ struct client_options {
   client_options(client_options const& other)
       : cache_resolved_(other.cache_resolved_),
         follow_redirects_(other.follow_redirects_),
+        openssl_certificates_buffer_(other.openssl_certificates_buffer_),
         openssl_certificate_(other.openssl_certificate_),
         openssl_verify_path_(other.openssl_verify_path_),
         openssl_certificate_file_(other.openssl_certificate_file_),
@@ -55,6 +57,7 @@ struct client_options {
     using std::swap;
     swap(cache_resolved_, other.cache_resolved_);
     swap(follow_redirects_, other.follow_redirects_);
+    swap(openssl_certificates_buffer_, other.openssl_certificates_buffer_);
     swap(openssl_certificate_, other.openssl_certificate_);
     swap(openssl_verify_path_, other.openssl_verify_path_);
     swap(openssl_certificate_file_, other.openssl_certificate_file_);
@@ -76,6 +79,15 @@ struct client_options {
     return *this;
   }
 
+  /// Set the certificate authority buffers to load for the SSL connection for
+  /// verification
+  client_options& openssl_certificates_buffer(string_type const& v) {
+    openssl_certificates_buffer_ = v;
+    return *this;
+  }
+
+  /// Set the filename of the certificate to load for the SSL connection for
+  /// verification.
   client_options& openssl_certificate(string_type const& v) {
     openssl_certificate_ = v;
     return *this;
@@ -125,6 +137,10 @@ struct client_options {
 
   bool follow_redirects() const { return follow_redirects_; }
 
+  boost::optional<string_type> openssl_certificates_buffer() const {
+    return openssl_certificates_buffer_;
+  }
+
   boost::optional<string_type> openssl_certificate() const {
     return openssl_certificate_;
   }
@@ -158,6 +174,7 @@ struct client_options {
  private:
   bool cache_resolved_;
   bool follow_redirects_;
+  boost::optional<string_type> openssl_certificates_buffer_;
   boost::optional<string_type> openssl_certificate_;
   boost::optional<string_type> openssl_verify_path_;
   boost::optional<string_type> openssl_certificate_file_;

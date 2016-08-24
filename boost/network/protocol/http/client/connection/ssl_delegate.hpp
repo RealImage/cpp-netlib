@@ -23,6 +23,7 @@ namespace impl {
 struct ssl_delegate : connection_delegate,
                       enable_shared_from_this<ssl_delegate> {
   ssl_delegate(asio::io_service &service, bool always_verify_peer,
+               optional<std::string> certificates_buffer,
                optional<std::string> certificate_filename,
                optional<std::string> verify_path,
                optional<std::string> certificate_file,
@@ -42,6 +43,7 @@ struct ssl_delegate : connection_delegate,
 
  private:
   asio::io_service &service_;
+  optional<std::string> certificates_buffer_;
   optional<std::string> certificate_filename_;
   optional<std::string> verify_path_;
   optional<std::string> certificate_file_;
