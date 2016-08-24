@@ -48,8 +48,8 @@ struct async_connection_policy : resolver_policy<Tag>::type {
       pimpl = impl::async_connection_base<
           Tag, version_major,
           version_minor>::new_connection(resolve, resolver, follow_redirect,
-                                         always_verify_peer, https, timeout,
-                                         certificates_buffer, certificate_filename,
+                                         always_verify_peer, https, certificates_buffer,
+                                         timeout, certificate_filename,
                                          verify_path, certificate_file,
                                          private_key_file, ciphers, ssl_options);
     }
@@ -87,9 +87,9 @@ struct async_connection_policy : resolver_policy<Tag>::type {
                                              version_minor>::resolve,
                     this, boost::arg<1>(), boost::arg<2>(), boost::arg<3>(),
                     boost::arg<4>()),
-        resolver, boost::iequals(protocol_, string_type("https")), timeout_,
-        certificates_buffer, certificate_filename, verify_path, certificate_file,
-        private_key_file, ciphers, ssl_options));
+        resolver, boost::iequals(protocol_, string_type("https")),
+        certificates_buffer, timeout_, certificate_filename, verify_path,
+        certificate_file, private_key_file, ciphers, ssl_options));
     return connection_;
   }
 
